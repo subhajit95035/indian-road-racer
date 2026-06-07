@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Indian Road Racer</title>
+    <style>
+        body { margin:0; background:#3e2723; display:flex; justify-content:center; align-items:center; height:100vh; font-family:Arial; }
+        .box { background:white; padding:30px; border-radius:15px; text-align:center; width:320px; }
+        input { width:90%; padding:10px; margin:10px 0; border: 1px solid #ccc; }
+        button { padding:10px 25px; background:#ff9800; border:none; cursor:pointer; font-weight:bold; }
+        
+        #gameArea { display:none; width:300px; height:600px; background:#424242; position:relative; overflow:hidden; border-left:10px solid #fff; border-right:10px solid #fff; }
+        .divider { width:10px; height:50px; background:white; position:absolute; left:145px; }
+        .car { width:50px; height:80px; position:absolute; border-radius:5px; transition: left 0.1s; }
+        #playerCar { background:#2196f3; bottom:20px; left:125px; }
+        #score { position: absolute; top: 10px; left: 10px; color: yellow; font-size: 20px; font-weight: bold; }
+        
+        /* গেম ওভার স্ক্রিন */
+        #gameOverScreen { display:none; position:absolute; top:200px; left:40px; width:220px; background:rgba(0,0,0,0.8); color:white; padding:20px; text-align:center; border-radius:10px; z-index:10; }
+    </style>
+</head>
+<body>
+
+<div id="authScreen" class="box">
+    <h2>Indian Road Racer</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="handleAuth()">Login/Register</button>
+</div>
+
+<div id="gameArea">
+    <div id="score">Score: 0</div>
+    <div id="playerCar" class="car"></div>
+    <div id="gameOverScreen">
+        <h3>Game Over!</h3>
+        <p id="finalScore"></p>
+        <button onclick="resetGame()">Try Again</button>
+    </div>
+</div>
+
+<script>
+    let gameInterval, enemyInterval;
+
+    function handleAuth() {
+        document.getElementById("authScreen").style.display = "none";
+        document.getElementById("gameArea").style.display = "block";
+        startGame();
+    }
+
+    function startGame() {
+        const playerCar = document.getElementById("playerCar");
+        const gameOverScreen = document.getElementById("gameOverScreen");
+        gameOverScreen.style.display = "none";
+        
+        let position = 125;
+        let score = 0;
+        
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowLeft" && position > 25) position -= 100;
+            if (e.key === "ArrowRight" && position < 225) position += 100;
+            playerCar.style.left = position + "px";
+        });
+
+        enemyInterval = setInterval(() => {
+            let enemy = document.createElement("div");
+            enemy.className = "car enemy";
+            enemy.style.background = "#f44336";
+            let lanes = [25, 125, 225];
+            enemy.style.left = lanes[Math.floor(Math.random() * 3)] + "px";
+            enemy.style.top = "-90px";
+            document.getElementById("gameArea").appendChild(enemy);
+
+            let top = -90;
+            let move = setInterval(() => {
+                top += 8;
+                enemy.style.top = top + "px";
+                if(top > 500 && Math.abs(parseInt(enemy.style.left) - position) < 50) {
+                    clearInterval(move);
+                    clearInterval(enemyInterval);
+                    document.getElementById("finalScore").innerText = "Your Score: " + score;
+                    gameOverScreen.style.display = "block";
+                }
+                if(top > 600) { score++; document.getElementById("score").innerText = "Score: "+score; enemy.remove(); clearInterval(move); }
+            }, 20);
+        }, 1000);
+    }
+
+    function resetGame() {
+        // 
+        let enemies = document.querySelectorAll('.enemy');
+        enemies.forEach(e => e.remove());
+        document.getElementById("score").innerText = "Score: 0";
+        startGame();
+    }
+</script>
+</body>
+</html>
